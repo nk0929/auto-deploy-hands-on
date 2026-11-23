@@ -9,4 +9,9 @@ public class IndexController {
   public String index() {
     return "index";
   }
+
+  @GetMapping("/coming-soon")
+  public String comingSoon() {
+    return "coming-soon";
+  }
 }
