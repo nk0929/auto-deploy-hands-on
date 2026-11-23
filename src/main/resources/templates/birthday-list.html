@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>誕生日管理メモ 一覧</title>
+    <link rel="stylesheet" href="/css/style.css" th:href="@{/css/style.css}">
+</head>
+<body>
+    <a href="#main-content" class="skip-link">本文へ移動</a>
+    <div class="wrapper">
+        <header>
+            <div class="header">
+                <a href="/" th:href="@{/}" class="link-reset"><span class="site-title">QuickTools-Web</span></a>
+            </div>
+            <nav class="nav-bar" aria-label="一覧ページナビゲーション">
+                <a href="/" th:href="@{/}" class="nav-menu">トップページ</a>
+            </nav>
+        </header>
+        <main id="main-content" tabindex="-1">
+            <section class="common-container">
+                <div class="section-header-row">
+                    <div>
+                        <h1 class="page-title">誕生日管理メモ</h1>
+                        <p class="page-lead">登録済みデータの確認と編集ができます。</p>
+                    </div>
+                    <div class="button-row">
+                        <a href="/coming-soon" th:href="@{/coming-soon}" class="btn-primary">新規追加</a>
+                    </div>
+                </div>
+                <hr>
+                <div class="table-scroll-wrapper">
+                    <table aria-label="誕生日一覧">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>名前</th>
+                                <th>生年月日</th>
+                                <th>年齢</th>
+                                <th>誕生日まで</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${#lists.isEmpty(birthdays)}">
+                                <td colspan="6" class="center">登録データはありません。</td>
+                            </tr>
+                            <tr th:each="birthday : ${birthdays}">
+                                <td th:text="${birthday.id}"></td>
+                                <td th:text="${birthday.name}"></td>
+                                <td th:text="${#temporals.format(birthday.birthDate, 'yyyy/MM/dd')}"></td>
+                                <td th:text="${birthday.age}"></td>
+                                <td th:text="|${birthday.daysUntilBirthday}日|"></td>
+                                <td><a href="/coming-soon" th:href="@{/coming-soon}" class="btn-action btn-compact">編集</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="helper-text">※ カウントダウンは本日基準の表示です。</p>
+                <div class="button-row">
+                    <a href="/coming-soon" th:href="@{/coming-soon}" class="btn-secondary">CSV取り込み（実装中）</a>
+                </div>
+            </section>
+        </main>
+        <footer><div><hr><p class="center">2026 11/23 更新</p></div></footer>
+    </div>
+</body>
+</html>
