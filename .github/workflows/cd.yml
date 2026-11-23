@@ -2,13 +2,81 @@ name: CD Workflow
 
 on:
   push:
-    branches:
-      - '*'
+    branches: [main]
   workflow_dispatch:
 
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
 jobs:
-  echo:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v6
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Build Jar File
+        run: |
+          ./mvnw clean package -DskipTests
+
+      - name: Upload Fat-Jar
+        uses: actions/upload-artifact@v7
+        with:
+          name: app-jar
+          path: |
+            target/*.jar
+          retention-days: 1
+
+  deploy:
+    needs: build
     runs-on: self-hosted
     steps:
-      - name: Echo message to log file
-        run: cd ~ && echo "Hello, self-hosted runner!" >> ./cd.log
+      - name: Download Jar File
+        uses: actions/download-artifact@v8
+        with:
+          name: app-jar
+
+      - name: Backup Existing Jar
+        run: |
+          ssh ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} 'bash -lc "mkdir -p /app/backup && cp /app/app.jar /app/backup/app.jar.$(date +%Y%m%d_%H%M%S).bak || true"'
+
+      - name: SCP Jar File
+        run: |
+          JAR_FILE=$(ls *.jar | head -n 1)
+          scp "$JAR_FILE" ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/app/app.jar
+
+      - name: Stop Application
+        run: |
+          ssh ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} 'bash -s' << 'EOF'
+            set -e
+
+            PIDS=$(pgrep -u "$USER" -x java || true)
+
+            if [ -n "$PIDS" ]; then
+              kill -15 $PIDS
+              for i in $(seq 1 30); do
+                kill -0 $PIDS 2>/dev/null || break
+                sleep 1
+              done
+              kill -9 $PIDS 2>/dev/null || true
+            fi
+          EOF
+
+      - name: Restart Application
+        run: |
+          ssh ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} 'bash -lc "nohup java -jar /app/app.jar </dev/null >/dev/null 2>&1 & echo JAVA_PID=\$! && sleep 3"'
+
+      - name: Verify Application Restart
+        run: |
+          ssh ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} 'bash -lc "pgrep -u \"$USER\" -x java || true"'
+
+      - name: Delete Downloaded Jar
+        run: |
+          bash -lc "rm -f *.jar"
