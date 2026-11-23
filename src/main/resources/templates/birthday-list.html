@@ -25,7 +25,7 @@
                         <p class="page-lead">登録済みデータの確認と編集ができます。</p>
                     </div>
                     <div class="button-row">
-                        <a href="/coming-soon" th:href="@{/coming-soon}" class="btn-primary">新規追加</a>
+                        <a href="/birthdays/detail?mode=add" th:href="@{/birthdays/detail(mode='add')}" class="btn-primary">新規追加</a>
                     </div>
                 </div>
                 <hr>
@@ -51,7 +51,7 @@
                                 <td th:text="${#temporals.format(birthday.birthDate, 'yyyy/MM/dd')}"></td>
                                 <td th:text="${birthday.age}"></td>
                                 <td th:text="|${birthday.daysUntilBirthday}日|"></td>
-                                <td><a href="/coming-soon" th:href="@{/coming-soon}" class="btn-action btn-compact">編集</a></td>
+                                <td><a href="/birthdays/detail?id=1" th:href="@{/birthdays/detail(id=${birthday.id})}" class="btn-action btn-compact">編集</a></td>
                             </tr>
                         </tbody>
                     </table>

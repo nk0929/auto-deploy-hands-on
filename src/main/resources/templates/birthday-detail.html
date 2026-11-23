@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>誕生日管理メモ 編集・追加</title>
+    <link rel="stylesheet" href="/css/style.css" th:href="@{/css/style.css}">
+</head>
+<body>
+    <a href="#main-content" class="skip-link">本文へ移動</a>
+    <div class="wrapper">
+        <header>
+            <div class="header">
+                <a href="/" th:href="@{/}" class="link-reset"><span class="site-title">QuickTools-Web</span></a>
+            </div>
+            <nav class="nav-bar" aria-label="フォームページナビゲーション">
+                <a href="/" th:href="@{/}" class="nav-menu">トップページ</a>
+            </nav>
+        </header>
+        <main id="main-content" tabindex="-1">
+            <section class="common-container">
+                <h1 class="page-title">誕生日データ 編集・追加フォーム</h1>
+                <p class="page-lead">既存データの編集または新規追加を行う入力フォームです。</p>
+                <hr>
+                
+                <div class="info-message" th:if="${errors != null and !#lists.isEmpty(errors)}">
+                    <strong>入力内容を確認してください</strong>
+                    <ul class="list-compact">
+                        <li th:each="error : ${errors}" th:text="${error}">エラー</li>
+                    </ul>
+                </div>
+
+                <form action="/birthdays/save" th:action="@{/birthdays/save}" method="post" class="content-stack">
+                    <input type="hidden" name="mode" th:value="${mode}">
+                    <input type="hidden" name="id" th:if="${form.id != null}" th:value="${form.id}">
+                    <div class="form-grid">
+                        <div>
+                            <label for="birthday-id">ID</label>
+                            <input id="birthday-id" name="birthday-id" type="text" class="input-wide" th:value="${form.idDisplay}" readonly aria-describedby="birthday-id-help">
+                            <p id="birthday-id-help" class="helper-text">編集時は採番済みのIDを表示します。追加時は「登録後に自動採番」と表示します。</p>
+                        </div>
+                        <div>
+                            <label for="name">名前<span class="field-required">必須</span></label>
+                            <input id="name" name="name" type="text" class="input-wide" th:value="${form.name}" required>
+                        </div>
+                    </div>
+                    <div class="form-grid">
+                        <div>
+                            <label for="birth-date">生年月日<span class="field-required">必須</span></label>
+                            <input id="birth-date" name="birthDate" type="date" class="input-wide" th:value="${form.birthDate}" required>
+                        </div>
+                        <div>
+                            <label for="memo">メモ</label>
+                            <textarea id="memo" name="note" rows="4" class="input-wide" th:text="${form.note}"></textarea>
+                        </div>
+                    </div>
+                    <div class="button-row">
+                        <button type="submit">保存</button>
+                        <a href="/birthdays" th:href="@{/birthdays}" class="btn-secondary">一覧へ戻る</a>
+                    </div>
+                </form>
+            </section>
+        </main>
+        <footer><div><hr><p class="center">2026 11/23 更新</p></div></footer>
+    </div>
+</body>
+</html>
